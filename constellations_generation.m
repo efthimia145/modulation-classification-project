@@ -44,7 +44,7 @@ constDiag_qpsk(ynoisy_qpsk)
 
 %% PAM
 
-M = 16; % Alphabet size, 16-QAM
+M = 16; % Alphabet size, 16-PAM
 x = randi([0 M-1],500,1); % Input signal
 
 cpts = pammod(x,M,pi/4);
