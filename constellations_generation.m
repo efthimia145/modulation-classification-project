@@ -1,16 +1,29 @@
+%% ======================================================================== %
+%   Main function of constellations generation. 
+%   This script will be used to generate 4 different modulations, using 
+%   different SNR values, and different parameters for the Rayleigh
+%   Channel. 
+%   The final scatter plots will be used for the team to prepare the
+%   dataset and, consequently, train a model for modulation classification
+%   via DNN (or CNN).
+%% ======================================================================== %
+
 sampleRate1GHz = 1e6; % Sample rate of 1G Hz 
 sampleRate500KHz = 500e3; % Sample rate of 500K Hz
 sampleRate20KHz  = 20e3; % Sample rate of 20K Hz
 maxDopplerShift  = 0; % Maximum Doppler shift of diffuse components (Hz)
-delayVector = [0 110 190 410]*1e-9; % Discrete delays of four-path channel (s)
-gainVector  = [0 -9.7 -19.2 -22.8]; % Average path gains (dB)
-SNR = 20;
+delayVector1 = [0 110 190 410]*1e-9; % Discrete delays of four-path channel (s)
+delayVector2 = delayVector1/2; % Discrete delays of four-path channel (s)
+gainVector1  = [0 -9.7 -19.2 -22.8]; % Average path gains (dB)
+gainVector2  = gainVector1/2; % Average path gains (dB)
+pause_sec = 2;
+
 
 % Configure a Rayleigh channel object
 rayChan = comm.RayleighChannel(...
     'SampleRate',sampleRate500KHz, ...
-    'PathDelays',delayVector, ...
-    'AveragePathGains',gainVector, ...
+    'PathDelays',delayVector2, ...
+    'AveragePathGains',gainVector2, ...
     'NormalizePathGains',true, ...
     'MaximumDopplerShift',maxDopplerShift, ...
     'DopplerSpectrum',{doppler('Flat'),doppler('Flat'),doppler('Flat'),doppler('Flat')}, ...
@@ -19,104 +32,69 @@ rayChan = comm.RayleighChannel(...
     'PathGainsOutputPort',true);
 
     % doppler('Gaussian',0.6)
-    
-%% QAM 
 
-M = 4; % Alphabet size, 16-QAM
-bitsPerFrame_QAM = 500;
-x = randi([0 M-1],bitsPerFrame_QAM,1); % Input signal
+for SNR = 0:50:2
+    for repeats = 0:50
+        
+        %% QAM 
 
-cpts = qammod(0:M-1,M);
-constDiag_qam = comm.ConstellationDiagram('ReferenceConstellation',cpts, ...
-    'XLimits',[-M M],'YLimits',[-M M]);
+        M = 4; % Alphabet size, 16-QAM
+        bitsPerFrame_QAM = 500;
 
-y = qammod(x,M);
-ynoisy_qam = awgn(y,SNR,'measured'); % Noise addition (SNR)
+        [ynoisy_qam, constDiag_qam] = QAM(M, bitsPerFrame_QAM, rayChan, SNR);
 
-% release(rayChan)
-ynoisy_qam = rayChan(ynoisy_qam);
+        %% QPSK
 
-z = qamdemod(ynoisy_qam,M);
-[num,rt] = symerr(x,z); % Compute number of symbol errors and symbol error rate
+        M = 4; % Alphabet size, 16-QAM
+        bitsPerFrame_QPSK = 500;
 
-fprintf("Number of symbol errors: %f\n", num);
-fprintf("Symbol error rate: %f\n", rt);
+        [ynoisy_qpsk, constDiag_qpsk] = QPSK(M, bitsPerFrame_QPSK, rayChan, SNR);
 
-constDiag_qam(ynoisy_qam)
+        %% PAM
 
-%% QPSK
+        M = 16; % Alphabet size, 16-QAM
+        bitsPerFrame_PAM = 500;
 
-M = 4; % Alphabet size, 16-QAM
-bitsPerFrame_QPSK = 500;
-x = randi([0 M-1],bitsPerFrame_QPSK,1); % Input signal
+        [ynoisy_pam, constDiag_pam] = PAM(M, bitsPerFrame_PAM, rayChan, SNR);
 
-qpskmod = comm.QPSKModulator;
-qpskdemod = comm.QPSKDemodulator;
-cpts = qpskmod(x);
+        %% APSK 
 
-constDiag_qpsk = comm.ConstellationDiagram('ReferenceConstellation',cpts, ...
-    'XLimits',[-M M],'YLimits',[-M M]);
+        M = [4 8 20]; % Alphabet size, APSK
+        radii = [0.3 0.7 1.2];
+        bitsPerFrame_APSK = 500;
 
-y = qpskmod(x);
-ynoisy_qpsk = awgn(y,SNR,'measured'); % Noise addition (SNR)
+        [ynoisy_apsk, constDiag_apsk] = APSK(M, radii, bitsPerFrame_APSK, rayChan, SNR);
 
-% release(rayChan)
-ynoisy_qpsk = rayChan(ynoisy_qpsk);
+        %%
+        constDiag_qam(ynoisy_qam)
+        constDiag_pam(ynoisy_pam)
+        constDiag_qpsk(ynoisy_qpsk)
+        constDiag_apsk(ynoisy_apsk)
 
-z = qpskdemod(ynoisy_qpsk);
-[num,rt] = symerr(x,z); % Compute number of symbol errors and symbol error rate
-
-fprintf("Number of symbol errors: %f\n", num);
-fprintf("Symbol error rate: %f\n", rt);
-
-constDiag_qpsk(ynoisy_qpsk)
-
-%% PAM
-
-M = 16; % Alphabet size, 16-QAM
-bitsPerFrame_PAM = 500;
-x = randi([0 M-1],bitsPerFrame_PAM,1); % Input signal
-
-cpts = pammod(x,M,pi/4);
-constDiag_pam = comm.ConstellationDiagram('ReferenceConstellation',cpts, ...
-    'XLimits',[-M M],'YLimits',[-M M]);
-
-y = pammod(x,M,pi/4);
-ynoisy_pam = awgn(y,SNR,'measured'); % Noise addition (SNR)
-
-% release(rayChan)
-ynoisy_pam = rayChan(ynoisy_pam);
-
-z = pamdemod(ynoisy_pam,M,pi/4);
-[num,rt] = symerr(x,z); % Compute number of symbol errors and symbol error rate
-
-
-fprintf("Number of symbol errors: %f\n", num);
-fprintf("Symbol error rate: %f\n", rt);
-constDiag_pam(ynoisy_pam)
-
-%% APSK 
-
-M = [4 8 20]; % Alphabet size, APSK
-radii = [0.3 0.7 1.2];
-modOrder = sum(M);
-bitsPerFrame_APSK = 500;
-x = randi([0 modOrder-1],bitsPerFrame_APSK,1); % Input signal
-
-cpts = apskmod(x,M,radii);
-constDiag_apsk = comm.ConstellationDiagram('ReferenceConstellation',cpts, ...
-    'XLimits',[-2*radii(3) 2*radii(3)],'YLimits',[-2*radii(3) 2*radii(3)]);
-
-y = apskmod(x,M,radii);
-ynoisy_apsk = awgn(y,SNR,'measured'); % Noise addition (SNR)
-
-% release(rayChan)
-ynoisy_apsk = rayChan(ynoisy_apsk);
-
-z = apskdemod(ynoisy_apsk,M,radii);
-[num,rt] = symerr(x,z); % Compute number of symbol errors and symbol error rate
-
-
-fprintf("Number of symbol errors: %f\n", num);
-fprintf("Symbol error rate: %f\n", rt);
-constDiag_apsk(ynoisy_apsk)
+        %%
+        p = scatterplot(ynoisy_qam);
+        % set(gca,'Color','k')
+        % grid on;
+        saveas(gcf, append('QAM_', int2str(SNR), '_', int2str(repeats), '.png'))
+        
+        %%
+        scatterplot(ynoisy_pam)
+        % set(gca,'Color','k')
+        % grid on;
+        saveas(gcf, append('PAM_', int2str(SNR), '_', int2str(repeats), '.png'))
+        
+        %%
+        scatterplot(ynoisy_qpsk)
+        % set(gca,'Color','k')
+        % grid on;
+        saveas(gcf, append('QPSK_', int2str(SNR), '_', int2str(repeats), '.png'))
+        
+        %%
+        scatterplot(ynoisy_apsk)
+        % set(gca,'Color','k')
+        % grid on;
+        saveas(gcf, append('APSK_', int2str(SNR), '_', int2str(repeats), '.png'))
+        
+        pause(pause_sec);
+    end
+end
