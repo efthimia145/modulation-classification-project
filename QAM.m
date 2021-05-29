@@ -1,12 +1,13 @@
-function [ynoisy_qam, constDiag_qam] = QAM(M, bitsPerFrame_QAM, rayChan, SNR)
+% function [ynoisy_qam, constDiag_qam] = QAM(M, bitsPerFrame_QAM, rayChan, SNR)
+function [ynoisy_qam] = QAM(M, bitsPerFrame_QAM, rayChan, SNR)
 
     %% QAM 
     
     x = randi([0 M-1],bitsPerFrame_QAM,1); % Input signal
 
-    cpts = qammod(0:M-1,M);
-    constDiag_qam = comm.ConstellationDiagram('ReferenceConstellation',cpts, ...
-        'XLimits',[-M M],'YLimits',[-M M]);
+%     cpts = qammod(0:M-1,M);
+%     constDiag_qam = comm.ConstellationDiagram('ReferenceConstellation',cpts, ...
+%         'XLimits',[-M M],'YLimits',[-M M]);
 
     y = qammod(x,M);
     ynoisy_qam = awgn(y,SNR,'measured'); % Noise addition (SNR)

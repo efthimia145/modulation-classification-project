@@ -40,55 +40,54 @@ rayChan_doppler = comm.RayleighChannel(...
     'Seed',22, ...
     'PathGainsOutputPort',true);
     
-NTrain = 2000;
+NTrain = 5000;
 NClass = 12;
 L = 500;
 SNR_low = 0;
 SNR_high = 50;
 SNR_step = 10;
-train_data = zeros(NClass * NTrain, L);
-train_label = zeros(NClass * NTrain, 1);
 
 count_classes = -1;
-counter_N = -1;
-
 
 
 %% QAM 
 tic
 M_QAM = [4 8 16 64];
-for M = M_QAM
+for M = M_QAM    
     count_classes = count_classes + 1;
     display = [num2str(count_classes), "-QAM"];
     disp(display)
     for SNR = SNR_low:SNR_step:SNR_high
+        signal_data = zeros(NTrain, L);
+        signal_label = zeros(NTrain, 1);
+        
         display = ["SNR: ", num2str(SNR)];
         disp(display)
-        counter_N = counter_N + 1;
         for row = 1:NTrain
             
             bitsPerFrame_QAM = L;
             
             if unidrnd(2) == 2
-                [ynoisy_qam, constDiag_qam] = QAM(M, bitsPerFrame_QAM, rayChan, SNR);
+                [ynoisy_qam] = QAM(M, bitsPerFrame_QAM, rayChan, SNR);
             else
-                [ynoisy_qam, constDiag_qam] = QAM(M, bitsPerFrame_QAM, rayChan_doppler, SNR);
+                [ynoisy_qam] = QAM(M, bitsPerFrame_QAM, rayChan_doppler, SNR);
             end
             
-            train_data(row + counter_N*NTrain, :) = ynoisy_qam;
-            train_label(row + counter_N*NTrain, 1) = count_classes;
-            
-            clearvars -except train_data train_label NTrain count_classes ...
-                            counter_N M_QAM M SNR SNR_low SNR_step SNR_high ...
-                            L rayChan rayChan_doppler
+            signal_data(row, :) = ynoisy_qam;
+            signal_label(row, 1) = count_classes;
        
         end
         toc
+        save(append('./dataset/train_data_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+                                                    'signal_data', '-mat');
+        save(append('./dataset/train_label_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+                                                    'signal_label', '-mat');
+        clearvars -except NTrain count_classes L rayChan rayChan_doppler ...
+                            M_QAM M SNR SNR_low SNR_step SNR_high
+                            
     end
 end
 disp("QAM is done")
-save('./dataset/train_data_QAM.mat', 'train_data', '-mat');
-save('./dataset/train_label_QAM.mat', 'train_label', '-mat');
 c = clock;
 c = fix(c);
 fprintf("Files saved at: %d:%d:%d", c(4:5))
@@ -101,31 +100,34 @@ count_classes = count_classes + 1;
 display = [num2str(count_classes), "-QPSK"];
 disp(display)
 for SNR = SNR_low:SNR_step:SNR_high
+    signal_data = zeros(NTrain, L);
+    signal_label = zeros(NTrain, 1);
+    
     display = ["SNR: ", num2str(SNR)];
     disp(display)
-    counter_N = counter_N + 1;
     for row = 1:NTrain
 
         bitsPerFrame_QPSK = L;
         if unidrnd(2) == 2
-            [ynoisy_qpsk, constDiag_qpsk] = QPSK(M, bitsPerFrame_QPSK, rayChan, SNR);
+            [ynoisy_qpsk] = QPSK(M, bitsPerFrame_QPSK, rayChan, SNR);
         else
-            [ynoisy_qpsk, constDiag_qpsk] = QPSK(M, bitsPerFrame_QPSK, rayChan_doppler, SNR);
+            [ynoisy_qpsk] = QPSK(M, bitsPerFrame_QPSK, rayChan_doppler, SNR);
         end
 
-        train_data(row + counter_N*NTrain, :) = ynoisy_qpsk;
-        train_label(row + counter_N*NTrain, 1) = count_classes;
-
-        clearvars -except train_data train_label NTrain count_classes ...
-                            counter_N M SNR SNR_low SNR_step SNR_high ...
-                            L rayChan rayChan_doppler
+        signal_data(row, :) = ynoisy_qpsk;
+        signal_label(row, 1) = count_classes;
+        
     end
     toc
+    save(append('./dataset/train_data_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+                                                    'signal_data', '-mat');
+    save(append('./dataset/train_label_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+                                                    'signal_label', '-mat');
+    clearvars -except NTrain count_classes L rayChan rayChan_doppler ...
+                        M SNR SNR_low SNR_step SNR_high
     
 end
 disp("QPSK is done")
-save('./dataset/train_data_QPSK.mat', 'train_data', '-mat');
-save('./dataset/train_label_QPSK.mat', 'train_label', '-mat');
 c = clock;
 c = fix(c);
 fprintf("Files saved at: %d:%d:%d", c(4:5))
@@ -138,31 +140,36 @@ for M = M_PAM
     display = [num2str(count_classes), "-PAM"];
     disp(display)
     for SNR = SNR_low:SNR_step:SNR_high
+        signal_data = zeros(NTrain, L);
+        signal_label = zeros(NTrain, 1);
+        
         display = ["SNR: ", num2str(SNR)];
         disp(display)
-        counter_N = counter_N + 1;
         for row = 1:NTrain
             
             bitsPerFrame_PAM = L;
             if unidrnd(2) == 2
-                [ynoisy_pam, constDiag_pam] = PAM(M, bitsPerFrame_PAM, rayChan, SNR);
+                [ynoisy_pam] = PAM(M, bitsPerFrame_PAM, rayChan, SNR);
             else
-                [ynoisy_pam, constDiag_pam] = PAM(M, bitsPerFrame_PAM, rayChan_doppler, SNR);
+                [ynoisy_pam] = PAM(M, bitsPerFrame_PAM, rayChan_doppler, SNR);
             end
             
-            
-            train_data(row + counter_N*NTrain, :) = ynoisy_pam;
-            train_label(row + counter_N*NTrain, 1) = count_classes;
+            signal_data(row, :) = ynoisy_pam;
+            signal_label(row, 1) = count_classes;
        
         end
         toc
+        save(append('./dataset/train_data_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+                                                    'signal_data', '-mat');
+        save(append('./dataset/train_label_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+                                                    'signal_label', '-mat');
+        clearvars -except NTrain count_classes L rayChan rayChan_doppler ...
+                            M_PAM M SNR SNR_low SNR_step SNR_high
     end
     
     
 end
 disp("PAM is done")
-save('./dataset/train_data_PAM.mat', 'train_data', '-mat');
-save('./dataset/train_label_PAM.mat', 'train_label', '-mat');
 c = clock;
 c = fix(c);
 fprintf("Files saved at: %d:%d:%d", c(4:5))
@@ -178,41 +185,38 @@ for k = 1:3
     display = [num2str(count_classes), "-APSK"];
     disp(display)
     for SNR = SNR_low:SNR_step:SNR_high
+        signal_data = zeros(NTrain, L);
+        signal_label = zeros(NTrain, 1);
+        
         display = ["SNR: ", num2str(SNR)];
         disp(display)
-        counter_N = counter_N + 1;
         for row = 1:NTrain
             
             bitsPerFrame_APSK = L;
             if unidrnd(2) == 2
-                [ynoisy_apsk, constDiag_apsk] = APSK(M, radii, bitsPerFrame_APSK, rayChan, SNR);
+                [ynoisy_apsk] = APSK(M, radii, bitsPerFrame_APSK, rayChan, SNR);
             else
-                [ynoisy_apsk, constDiag_apsk] = APSK(M, radii, bitsPerFrame_APSK, rayChan_doppler, SNR);
+                [ynoisy_apsk] = APSK(M, radii, bitsPerFrame_APSK, rayChan_doppler, SNR);
             end
             
             
-            train_data(row + counter_N*NTrain, :) = ynoisy_pam;
-            train_label(row + counter_N*NTrain, 1) = count_classes;
+            signal_data(row, :) = ynoisy_apsk;
+            signal_label(row, 1) = count_classes;
        
         end
         toc
+        save(append('./dataset/train_data_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+                                                    'signal_data', '-mat');
+        save(append('./dataset/train_label_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+                                                    'signal_label', '-mat');
+        clearvars -except NTrain count_classes L rayChan rayChan_doppler ...
+                            M_APSK M SNR SNR_low SNR_step SNR_high radiis radii k
     end
-    clearvars -except train_data train_label NTrain count_classes ...
-                            counter_N M_APSK M SNR SNR_low SNR_step SNR_high ...
-                            L rayChan rayChan_doppler radiis k
 end
 disp("APSK is done")
-save('./dataset/train_data_APSK.mat', 'train_data', '-mat');
-save('./dataset/train_label_APSK.mat', 'train_label', '-mat');
 c = clock;
 c = fix(c);
-fprintf("Files saved at: %d:%d:%d", c(4:5))
-
-save('./dataset/train_data.mat', 'train_data', '-mat');
-save('./dataset/train_label.mat', 'train_label', '-mat');
-c = clock;
-c = fix(c);
-fprintf("Files saved at: %d:%d:%d", c(4:5))
+fprintf("All Files ready at: %d:%d:%d", c(4:5))
 
 %% Constellations Diagramms
 % constDiag_qam(ynoisy_qam)
