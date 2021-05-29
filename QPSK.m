@@ -17,10 +17,10 @@ function [ynoisy_qpsk, constDiag_qpsk] = QPSK(M, bitsPerFrame_QPSK, rayChan, SNR
     % release(rayChan)
     ynoisy_qpsk = rayChan(ynoisy_qpsk);
 
-    z = qpskdemod(ynoisy_qpsk);
-    [num,rt] = symerr(x,z); % Compute number of symbol errors and symbol error rate
-
-    fprintf("Number of symbol errors: %f\n", num);
-    fprintf("Symbol error rate: %f\n", rt);
+%     z = qpskdemod(ynoisy_qpsk);
+%     [num,rt] = symerr(x,z); % Compute number of symbol errors and symbol error rate
+% 
+%     fprintf("Number of symbol errors: %f\n", num);
+%     fprintf("Symbol error rate: %f\n", rt);
     
 end

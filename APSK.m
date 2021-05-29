@@ -14,12 +14,13 @@ function [ynoisy_apsk, constDiag_apsk] = APSK(M, radii, bitsPerFrame_APSK, rayCh
 
     % release(rayChan)
     ynoisy_apsk = rayChan(ynoisy_apsk);
+    disp(ynoisy_apsk)
 
-    z = apskdemod(ynoisy_apsk,M,radii);
-    [num,rt] = symerr(x,z); % Compute number of symbol errors and symbol error rate
-
-
-    fprintf("Number of symbol errors: %f\n", num);
-    fprintf("Symbol error rate: %f\n", rt);
+%     z = apskdemod(ynoisy_apsk,M,radii);
+%     [num,rt] = symerr(x,z); % Compute number of symbol errors and symbol error rate
+% 
+% 
+%     fprintf("Number of symbol errors: %f\n", num);
+%     fprintf("Symbol error rate: %f\n", rt);
     
 end

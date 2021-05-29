@@ -14,10 +14,10 @@ function [ynoisy_qam, constDiag_qam] = QAM(M, bitsPerFrame_QAM, rayChan, SNR)
     % release(rayChan)
     ynoisy_qam = rayChan(ynoisy_qam);
 
-    z = qamdemod(ynoisy_qam,M);
-    [num,rt] = symerr(x,z); % Compute number of symbol errors and symbol error rate
-
-    fprintf("Number of symbol errors: %f\n", num);
-    fprintf("Symbol error rate: %f\n", rt);
+%     z = qamdemod(ynoisy_qam,M);
+%     [num,rt] = symerr(x,z); % Compute number of symbol errors and symbol error rate
+% 
+%     fprintf("Number of symbol errors: %f\n", num);
+%     fprintf("Symbol error rate: %f\n", rt);
 
 end
