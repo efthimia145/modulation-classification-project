@@ -3,6 +3,7 @@ import tensorflow as tf
 import random as rn
 import os
 import json
+import mat73
 
 from keras import metrics, regularizers, optimizers, backend
 from keras.callbacks import TensorBoard, EarlyStopping
@@ -23,17 +24,17 @@ sess = tf.compat.v1.Session(graph=tf.compat.v1.get_default_graph(), config=sessi
 backend.set_session(sess)
 
 seqLen = 500
-nClass = 12
+nClass = 13
 
 # ===================================== Load Train Data ======================================================
-x_data_mat = sio.loadmat('./dataset/train_data.mat')
+x_data_mat = mat73.loadmat('train_data.mat')
 x_data_complex = x_data_mat['train_data']
 x_data_real = x_data_complex.real
 x_data_imag = x_data_complex.imag
 x_data_real = x_data_real.reshape((x_data_real.shape[0], seqLen, 1))
 x_data_imag = x_data_imag.reshape((x_data_imag.shape[0], seqLen, 1))
 x_train = np.stack((x_data_real, x_data_imag), axis=1)
-y_data_mat = sio.loadmat('./dataset/train_label.mat')
+y_data_mat = mat73.loadmat('train_label.mat')
 y_data = y_data_mat['train_label']
 y_train = np_utils.to_categorical(y_data, nClass)
 
@@ -47,6 +48,7 @@ _in_ = Input(shape = (x_train.shape[1], x_train.shape[2], 1))
 ot = Conv2D(filters=64, kernel_size=(2,4), strides=1, padding='valid', use_bias=True, activation='relu')(_in_)
 ot = Conv2D(filters=16, kernel_size=(1,4), strides=1, padding='valid', use_bias=True, activation='relu')(ot)
 ot = Flatten()(ot)
+
 #ot = BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001, center=True, scale=True)(ot)
 ot = Dense(64, use_bias=True, activation='relu')(ot)
 ot = Dense(16, use_bias=True, activation='relu')(ot)
