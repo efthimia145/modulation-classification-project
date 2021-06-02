@@ -59,6 +59,13 @@ bitsPerFrame_QPSK = L;
 
 [ynoisy_qpsk, constDiag_qpsk] = QPSK(M, bitsPerFrame_QPSK, rayChan, SNR);
 
+%% BPSK
+
+M = 2; % Alphabet size, 16-QAM
+bitsPerFrame_BPSK = L;
+
+[ynoisy_bpsk, constDiag_bpsk] = BPSK(M, bitsPerFrame_BPSK, rayChan, SNR);
+
 %% PAM
 
 M = 16; % Alphabet size, 16-QAM
@@ -76,11 +83,12 @@ bitsPerFrame_APSK = L;
 
 %%
 
-save('./dataset/train_data.mat', 'train_data', '-mat');
-
+% save('./dataset/train_data.mat', 'train_data', '-mat');
+% 
 constDiag_qam(ynoisy_qam)
 constDiag_pam(ynoisy_pam)
 constDiag_qpsk(ynoisy_qpsk)
+constDiag_bpsk(ynoisy_bpsk)
 constDiag_apsk(ynoisy_apsk)
 
 pause(pause_sec);

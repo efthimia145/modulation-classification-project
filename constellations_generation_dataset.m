@@ -40,14 +40,28 @@ rayChan_doppler = comm.RayleighChannel(...
     'Seed',22, ...
     'PathGainsOutputPort',true);
     
-NTrain = 5000;
-NClass = 12;
+
+NClass = 13;
 L = 500;
 SNR_low = 0;
 SNR_high = 50;
 SNR_step = 10;
-
+files_path = 'D:\MAT files\dataset\';
 count_classes = -1;
+train_flag = 0;
+
+%% For training
+if train_flag == 1
+    postfix_data = 'train_data';
+    postfix_label = 'train_label';
+    NTrain = 5000;
+
+%% For testing
+else
+    postfix_data = 'test_data';
+    postfix_label = 'test_label';
+    NTrain = 500;
+end
 
 
 %% QAM 
@@ -78,32 +92,32 @@ for M = M_QAM
        
         end
         toc
-        save(append('./dataset/train_data_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+        save(append(files_path, postfix_data, num2str(count_classes), '_', num2str(SNR),'.mat'), ...
                                                     'signal_data', '-mat');
-        save(append('./dataset/train_label_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+        save(append(files_path, postfix_label, num2str(count_classes), '_', num2str(SNR),'.mat'), ...
                                                     'signal_label', '-mat');
         clearvars -except NTrain count_classes L rayChan rayChan_doppler ...
-                            M_QAM M SNR SNR_low SNR_step SNR_high
+                            M_QAM M SNR SNR_low SNR_step SNR_high NClass ...
+                                files_path train_flag postfix_data postfix_label
                             
     end
 end
 disp("QAM is done")
 c = clock;
 c = fix(c);
-fprintf("Files saved at: %d:%d:%d", c(4:5))
-
+fprintf("Files saved at: %d:%d:%d. \n", c(4:6))
 
 %% QPSK
 tic
 M = 4;
 count_classes = count_classes + 1;
-display = [num2str(count_classes), "-QPSK"];
+display = [num2str(count_classes), '-QPSK'];
 disp(display)
 for SNR = SNR_low:SNR_step:SNR_high
     signal_data = zeros(NTrain, L);
     signal_label = zeros(NTrain, 1);
     
-    display = ["SNR: ", num2str(SNR)];
+    display = ['SNR: ', num2str(SNR)];
     disp(display)
     for row = 1:NTrain
 
@@ -119,18 +133,58 @@ for SNR = SNR_low:SNR_step:SNR_high
         
     end
     toc
-    save(append('./dataset/train_data_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+    save(append(files_path, postfix_data, num2str(count_classes), '_', num2str(SNR),'.mat'), ...
                                                     'signal_data', '-mat');
-    save(append('./dataset/train_label_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+    save(append(files_path, postfix_label, num2str(count_classes), '_', num2str(SNR),'.mat'), ...
                                                     'signal_label', '-mat');
     clearvars -except NTrain count_classes L rayChan rayChan_doppler ...
-                        M SNR SNR_low SNR_step SNR_high
-    
+                        M SNR SNR_low SNR_step SNR_high NClass ...
+                            files_path train_flag postfix_data postfix_label
 end
 disp("QPSK is done")
 c = clock;
 c = fix(c);
-fprintf("Files saved at: %d:%d:%d", c(4:5))
+fprintf("Files saved at: %d:%d:%d. \n", c(4:6))
+
+%% BPSK
+tic
+M = 2;
+count_classes = count_classes + 1;
+display = [num2str(count_classes), "-BPSK"];
+disp(display)
+for SNR = SNR_low:SNR_step:SNR_high
+    signal_data = zeros(NTrain, L);
+    signal_label = zeros(NTrain, 1);
+    
+    display = ["SNR: ", num2str(SNR)];
+    disp(display)
+    for row = 1:NTrain
+
+        bitsPerFrame_BPSK = L;
+        if unidrnd(2) == 2
+            [ynoisy_bpsk] = BPSK(M, bitsPerFrame_BPSK, rayChan, SNR);
+        else
+            [ynoisy_bpsk] = BPSK(M, bitsPerFrame_BPSK, rayChan_doppler, SNR);
+        end
+
+        signal_data(row, :) = ynoisy_bpsk;
+        signal_label(row, 1) = count_classes;
+        
+    end
+    toc
+    save(append(files_path, postfix_data, num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+                                                    'signal_data', '-mat');
+    save(append(files_path, postfix_label, num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+                                                    'signal_label', '-mat');
+    clearvars -except NTrain count_classes L rayChan rayChan_doppler ...
+                        M SNR SNR_low SNR_step SNR_high NClass ...
+                            files_path train_flag postfix_data postfix_label
+    
+end
+disp("BPSK is done")
+c = clock;
+c = fix(c);
+fprintf("Files saved at: %d:%d:%d. \n", c(4:6))
 
 %% PAM
 tic
@@ -159,12 +213,13 @@ for M = M_PAM
        
         end
         toc
-        save(append('./dataset/train_data_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+        save(append(files_path, postfix_data, num2str(count_classes), '_', num2str(SNR),'.mat'), ...
                                                     'signal_data', '-mat');
-        save(append('./dataset/train_label_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+        save(append(files_path, postfix_label, num2str(count_classes), '_', num2str(SNR),'.mat'), ...
                                                     'signal_label', '-mat');
         clearvars -except NTrain count_classes L rayChan rayChan_doppler ...
-                            M_PAM M SNR SNR_low SNR_step SNR_high
+                            M_PAM M SNR SNR_low SNR_step SNR_high NClass ...
+                                files_path train_flag postfix_data postfix_label
     end
     
     
@@ -172,7 +227,7 @@ end
 disp("PAM is done")
 c = clock;
 c = fix(c);
-fprintf("Files saved at: %d:%d:%d", c(4:5))
+fprintf("Files saved at: %d:%d:%d. \n", c(4:6))
 
 %% APSK
 tic
@@ -205,18 +260,22 @@ for k = 1:3
        
         end
         toc
-        save(append('./dataset/train_data_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+        save(append(files_path, postfix_data, num2str(count_classes), '_', num2str(SNR),'.mat'), ...
                                                     'signal_data', '-mat');
-        save(append('./dataset/train_label_', num2str(count_classes), '_', num2str(SNR),'.mat'), ...
+        save(append(files_path, postfix_label, num2str(count_classes), '_', num2str(SNR),'.mat'), ...
                                                     'signal_label', '-mat');
         clearvars -except NTrain count_classes L rayChan rayChan_doppler ...
-                            M_APSK M SNR SNR_low SNR_step SNR_high radiis radii k
+                            M_APSK M SNR SNR_low SNR_step SNR_high radiis ...
+                                radii k NClass files_path ...
+                                    train_flag postfix_data postfix_label
     end
 end
 disp("APSK is done")
 c = clock;
 c = fix(c);
-fprintf("All Files ready at: %d:%d:%d", c(4:5))
+fprintf("Files saved at: %d:%d:%d. \n", c(4:6))
+
+merge_mat_files(NTrain, NClass, files_path, postfix_data, postfix_label, train_flag);
 
 %% Constellations Diagramms
 % constDiag_qam(ynoisy_qam)
