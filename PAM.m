@@ -1,5 +1,5 @@
-% function [ynoisy_pam, constDiag_pam] = PAM(M, bitsPerFrame_PAM, rayChan, SNR)
-function [ynoisy_pam] = PAM(M, bitsPerFrame_PAM, rayChan, SNR)
+function [ynoisy_pam, constDiag_pam] = PAM(M, bitsPerFrame_PAM, rayChan, SNR)
+% function [ynoisy_pam] = PAM(M, bitsPerFrame_PAM, rayChan, SNR)
 
     %% PAM
 

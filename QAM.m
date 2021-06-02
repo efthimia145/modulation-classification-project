@@ -1,5 +1,5 @@
-% function [ynoisy_qam, constDiag_qam] = QAM(M, bitsPerFrame_QAM, rayChan, SNR)
-function [ynoisy_qam] = QAM(M, bitsPerFrame_QAM, rayChan, SNR)
+function [ynoisy_qam, constDiag_qam] = QAM(M, bitsPerFrame_QAM, rayChan, SNR)
+% function [ynoisy_qam] = QAM(M, bitsPerFrame_QAM, rayChan, SNR)
 
     %% QAM 
     

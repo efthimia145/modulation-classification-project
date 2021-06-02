@@ -1,5 +1,5 @@
-% function [ynoisy_qpsk, constDiag_qpsk] = QPSK(M, bitsPerFrame_QPSK, rayChan, SNR)
-function [ynoisy_qpsk] = QPSK(M, bitsPerFrame_QPSK, rayChan, SNR)
+function [ynoisy_qpsk, constDiag_qpsk] = QPSK(M, bitsPerFrame_QPSK, rayChan, SNR)
+% function [ynoisy_qpsk] = QPSK(M, bitsPerFrame_QPSK, rayChan, SNR)
 
     %% QPSK
 

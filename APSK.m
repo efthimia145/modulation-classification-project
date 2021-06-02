@@ -1,5 +1,5 @@
-% function [ynoisy_apsk, constDiag_apsk] = APSK(M, radii, bitsPerFrame_APSK, rayChan, SNR)
-function [ynoisy_apsk] = APSK(M, radii, bitsPerFrame_APSK, rayChan, SNR)
+function [ynoisy_apsk, constDiag_apsk] = APSK(M, radii, bitsPerFrame_APSK, rayChan, SNR)
+% function [ynoisy_apsk] = APSK(M, radii, bitsPerFrame_APSK, rayChan, SNR)
 
     %% APSK 
 
