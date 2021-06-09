@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+plt.rcParams["figure.figsize"] = (10,6)
 
-def plot_all_classes(data, num_point, SNR_low, SNR_high, SNR_step, nClass, plots_path):
+def plot_all_classes(data, num_point, SNR_low, SNR_high, SNR_step, nClass, plots_path, model):
     snr = np.zeros(num_point)
     acc_4qam = np.zeros(num_point)
     acc_8qam = np.zeros(num_point)
@@ -74,12 +75,11 @@ def plot_all_classes(data, num_point, SNR_low, SNR_high, SNR_step, nClass, plots
     plt.xlim((SNR_low, SNR_high))
     plt.ylim((0,1))
     plt.xlabel('SNR(dB)')
-    plt.ylabel('Pc')
+    plt.ylabel('Probability of correct detection')
     plt.title('CNN_AWGN_Rayleigh (L = 500)')
-    plt.savefig(plots_path + 'every_class_L' + str(L) + '.png', format='png')
+    plt.savefig(plots_path + 'every_class_L' + str(L) + '_' + model + '.png', format='png')
 
-
-def plot_accuracy(data, num_point, SNR_low, SNR_high, SNR_step, nClass, plots_path):
+def plot_accuracy(data, num_point, SNR_low, SNR_high, SNR_step, nClass, plots_path, model):
     snr = np.zeros(num_point)
     acc = np.zeros(num_point)
     cnt_sum = 0
@@ -96,17 +96,16 @@ def plot_accuracy(data, num_point, SNR_low, SNR_high, SNR_step, nClass, plots_pa
     plt.plot(snr, acc, 'o-', label = 'L = ' + str(L))
 
     plt.grid(True)
-    #plt.legend(loc='lower right')
     plt.xlim((SNR_low, SNR_high))
     plt.ylim((0,1))
     plt.xlabel('SNR(dB)')
     plt.ylabel('Pc')
     plt.title('CNN_AWGN_Rayleigh')
-    plt.savefig(plots_path + 'L' + str(L) + '.png', format='png')
+    plt.savefig(plots_path + 'L' + str(L) + '_' + model + '.png', format='png')
 
-def plot_single_class(data, num_point, SNR_low, SNR_step, SNR_high, nClass, plots_path):
+def plot_single_class(data, num_point, SNR_low, SNR_step, SNR_high, nClass, plots_path, model):
 
-    class_tag = 0 # 0-bpsk; 1-4qam; 2-8psk; 3-16qam
+    class_tag = 0 
 
     snr = np.zeros(num_point)
     acc_4qam = np.zeros(num_point)
@@ -180,13 +179,12 @@ def plot_single_class(data, num_point, SNR_low, SNR_step, SNR_high, nClass, plot
     plt.ylim((0,1))
     plt.xlabel('SNR(dB)')
     plt.ylabel('Pc')
-    #plt.title('CNN_AWGN_EveryClass(L = 100)')
-    plt.savefig(plots_path + 'single_class_' + str(class_tag) + '_L' + str(L) + '.png', format='png')
+    plt.title('CNN_AWGN__Rayleigh_EveryClass (L = 500)')
+    plt.savefig(plots_path + 'single_class_' + str(class_tag) + '_L' + str(L) + '_' + model + '.png', format='png')
 
-
-def plot_confusion_matrix(data, SNR_low, SNR_step, plots_path):
+def plot_confusion_matrix(data, SNR_low, SNR_step, plots_path, model):
     
-    SNR_main = 0
+    SNR_main = 10
 
     cnt_sum = 0
     for rows in data[0,:]:
@@ -222,10 +220,11 @@ def plot_confusion_matrix(data, SNR_low, SNR_step, plots_path):
     plt.yticks(range(height), col)
     savefilename = 'SNR=' + str(SNR_main) + 'dB L=' + str(L)
     plt.title(savefilename)
-    plt.savefig(plots_path + savefilename + '.png', format='png')
+    plt.savefig(plots_path + savefilename + '_' + model + '.png', format='png')
 
 L = 500
-load_path = 'pred_confusion_mat_L' + str(L) + '.npy'
+model = 'model10'
+load_path = 'pred_confusion_mat_' + model +'_L' + str(L) + '.npy'
 data = np.load(load_path)
 
 SNR_low = 0
@@ -236,14 +235,14 @@ num_point = (int)((SNR_high-SNR_low)//SNR_step) + 1
 
 plots_path = 'Plots/'
 
-plot_all_classes(data, num_point, SNR_low, SNR_high, SNR_step, nClass, plots_path)
+plot_all_classes(data, num_point, SNR_low, SNR_high, SNR_step, nClass, plots_path, model)
 print("All classes plot -- printed")
 
-plot_accuracy(data, num_point, SNR_low, SNR_high, SNR_step, nClass, plots_path)
+plot_accuracy(data, num_point, SNR_low, SNR_high, SNR_step, nClass, plots_path, model)
 print("Accuracy plot -- printed")
 
-plot_single_class(data, num_point, SNR_low, SNR_step, SNR_high, nClass, plots_path)
-print("Single class plot -- printed")
+# plot_single_class(data, num_point, SNR_low, SNR_step, SNR_high, nClass, plots_path, model)
+# print("Single class plot -- printed")
 
-plot_confusion_matrix(data, SNR_low, SNR_step, plots_path)
+plot_confusion_matrix(data, SNR_low, SNR_step, plots_path, model)
 print("Confusion Matrix plot -- printed")
